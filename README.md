@@ -1,4 +1,8 @@
-# 🕊️ pigeonhole
+<p align="center">
+  <img src="assets/logo.png" alt="pigeonhole logo" width="180">
+</p>
+
+<h1 align="center">pigeonhole</h1>
 
 **Put any text in the right box.** A tiny self-hosted REST API for zero-shot text classification: intent, routing,
 sentiment, triage. No training, no prompts, no per-token bills. Send text and labels, get probabilities back.
