@@ -122,12 +122,10 @@ def classify(req: ClassifyRequest):
         results = ranked[:1]
     if req.top_k:
         results = results[: req.top_k]
-    best = results[0] if results else None
-    return {
-        "model": req.model,
-        "task": req.task,
-        "label": best["label"] if best else None,
-        "score": best["score"] if best else None,
-        "results": results,
-        "scores": {r["label"]: r["score"] for r in ranked},
-    }
+    response = {"model": req.model, "task": req.task}
+    if not req.multi_label:
+        response["label"] = results[0]["label"]
+        response["score"] = results[0]["score"]
+    response["results"] = results
+    response["scores"] = {r["label"]: r["score"] for r in ranked}
+    return response

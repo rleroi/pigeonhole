@@ -66,7 +66,7 @@ Response fields:
 | field     | meaning |
 |-----------|---------|
 | `results` | the prediction. Without `multi_label`: exactly one label. With `multi_label`: every label with a score >= `threshold` (can be empty), best first |
-| `label`, `score` | the best entry of `results`, or `null` if `results` is empty |
+| `label`, `score` | only without `multi_label`: the single winner (same as `results[0]`). Left out with `multi_label`, where there is no single answer: use `results` |
 | `scores`  | the full distribution: every label with its score. Without `multi_label` they sum to 1; with `multi_label` each label is scored independently |
 
 Unknown model names return `400`; a model whose package is not
