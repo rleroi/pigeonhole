@@ -28,6 +28,20 @@ curl -X POST localhost:8000/classify -H 'Content-Type: application/json' -d '{
 
 ## Quick start
 
+### Docker
+
+```bash
+git clone https://github.com/rleroi/pigeonhole.git
+cd pigeonhole
+docker compose up -d --build        # http://localhost:8000
+```
+
+Models are downloaded on first use and kept in the `models` volume. The image uses CPU-only PyTorch (about 1.5 GB).
+With two models loaded (`deberta-zeroshot` and `jevk5-lite`) the container used about 1 GB of RAM (`docker stats`,
+measured idle after a few requests) and the model cache was about 2.5 GB on disk.
+
+### Python
+
 Developed and tested on Python 3.14.
 
 ```bash
@@ -42,6 +56,7 @@ The first start downloads the default model from Hugging Face. Other models load
 then stay in memory. Interactive docs are at http://localhost:8000/docs.
 
 Pick a different default model: `DEFAULT_MODEL=gliclass-large-v3 uvicorn serve:app --port 8000`
+(with Docker: set `DEFAULT_MODEL` in `compose.yaml`).
 
 ## API
 

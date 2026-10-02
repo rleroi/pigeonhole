@@ -1,0 +1,13 @@
+services:
+  pigeonhole:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DEFAULT_MODEL: deberta-zeroshot
+    volumes:
+      - models:/models
+    restart: unless-stopped
+
+volumes:
+  models:
