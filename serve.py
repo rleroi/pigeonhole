@@ -74,6 +74,7 @@ def _gliclass(bundle, req: ClassifyRequest):
         tokenizer,
         classification_type="multi-label" if req.multi_label else "single-label",
         device="cpu",
+        progress_bar=False,
     )
     # return_hierarchical -> {label: score} for every label (softmax if single-label, sigmoid if multi-label)
     scores = pipe(req.text, req.labels, threshold=0.0, return_hierarchical=True)[0]
