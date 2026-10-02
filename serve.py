@@ -57,6 +57,7 @@ class ClassifyRequest(BaseModel):
     model: str = DEFAULT_MODEL
     multi_label: bool = False
     threshold: float = Field(0.5, ge=0, le=1)
+    top_k: int | None = Field(None, ge=1, description="only return the k best labels (default: all)")
 
 
 def _hf_zeroshot(pipe, req: ClassifyRequest):
@@ -116,4 +117,13 @@ def classify(req: ClassifyRequest):
     results = run_backend(req.model, model, req)
     if req.multi_label:
         results = [r for r in results if r["score"] >= req.threshold]
-    return {"model": req.model, "task": req.task, "results": results}
+    if req.top_k:
+        results = results[: req.top_k]
+    best = results[0] if results else None
+    return {
+        "model": req.model,
+        "task": req.task,
+        "label": best["label"] if best else None,
+        "score": best["score"] if best else None,
+        "results": results,
+    }

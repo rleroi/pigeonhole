@@ -15,7 +15,7 @@ curl -X POST localhost:8000/classify -H 'Content-Type: application/json' -d '{
 ```
 
 ```json
-{"model": "deberta-zeroshot", "task": "intent",
+{"model": "deberta-zeroshot", "task": "intent", "label": "annuleren", "score": 0.99,
  "results": [{"label": "annuleren", "score": 0.99}, {"label": "vraag", "score": 0.01}, ...]}
 ```
 
@@ -58,8 +58,11 @@ Lists available models, the default, and which are already loaded.
 | `model`       | string    | `deberta-zeroshot` | see [Models](#models) |
 | `multi_label` | bool      | `false`            | allow several labels at once |
 | `threshold`   | float 0-1 | `0.5`              | minimum score when `multi_label` is on |
+| `top_k`       | int       | all                | only return the k best labels in `results` |
 
-Results are sorted by `score`, highest first. Unknown model names return `400`; a model whose package is not
+The response has the winner as top-level `label` and `score` (`null` if nothing passes the threshold), plus `results`
+with the labels and scores, sorted by `score`, highest first. Without `multi_label`, most models return every label
+and the scores sum to 1; use `label`, or `top_k: 1`, if you only want the winner. Unknown model names return `400`; a model whose package is not
 installed returns `501`.
 
 ### Examples
@@ -92,7 +95,7 @@ r = requests.post("http://localhost:8000/classify", json={
     "text": "I want to cancel my order",
     "labels": ["cancel", "refund", "question"],
 })
-print(r.json()["results"][0])  # {'label': 'cancel', 'score': 0.69}
+print(r.json()["label"])  # cancel
 ```
 
 JavaScript:
@@ -103,7 +106,7 @@ const res = await fetch("http://localhost:8000/classify", {
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ text: "I want to cancel my order", labels: ["cancel", "refund", "question"] }),
 });
-const { results } = await res.json();
+const { label, score, results } = await res.json();
 ```
 
 PHP:
@@ -116,7 +119,7 @@ curl_setopt_array($ch, [
     CURLOPT_POSTFIELDS => json_encode(['text' => 'I want to cancel my order', 'labels' => ['cancel', 'refund', 'question']]),
     CURLOPT_RETURNTRANSFER => true,
 ]);
-$top = json_decode(curl_exec($ch), true)['results'][0];
+$label = json_decode(curl_exec($ch), true)['label'];
 ```
 
 ## Models
