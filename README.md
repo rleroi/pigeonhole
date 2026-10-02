@@ -9,21 +9,21 @@ sentiment, triage. No training, no prompts, no per-token bills. Send text and la
 
 ```bash
 curl -X POST localhost:8000/classify -H 'Content-Type: application/json' -d '{
-  "text": "Ik wil mijn bestelling annuleren",
-  "labels": ["annuleren", "terugbetaling", "vraag", "klacht", "compliment"]
+  "text": "My package arrived damaged and nobody answers my emails",
+  "labels": ["cancel", "refund", "question", "complaint", "praise"]
 }'
 ```
 
 ```json
-{"model": "deberta-zeroshot", "task": "intent", "label": "annuleren", "score": 0.99,
- "results": [{"label": "annuleren", "score": 0.99}],
- "scores": {"annuleren": 0.99, "vraag": 0.01, "terugbetaling": 0.0, "klacht": 0.0, "compliment": 0.0}}
+{"model": "deberta-zeroshot", "task": "intent", "label": "complaint", "score": 0.98,
+ "results": [{"label": "complaint", "score": 0.978}],
+ "scores": {"complaint": 0.978, "question": 0.011, "cancel": 0.006, "refund": 0.005, "praise": 0.0}}
 ```
 
 - **Zero-shot:** change the labels per request, nothing to retrain.
 - **Swap models per request:** three open-weight classifiers behind one endpoint (`"model": "jevk5-lite"`).
 - **Runs on CPU.** Typically 150-250 ms per request on a laptop. Everything stays on your machine.
-- **Benchmarked on Dutch and English**, including how much a trailing `?` changes the answer. See
+- **Works on Dutch too**, and is benchmarked on Dutch and English, including how much a trailing `?` changes the answer. See
   [BENCHMARK.md](BENCHMARK.md).
 
 ## Quick start
