@@ -75,8 +75,9 @@ def _gliclass(bundle, req: ClassifyRequest):
         classification_type="multi-label" if req.multi_label else "single-label",
         device="cpu",
     )
-    # threshold 0 -> return every label with its score
-    return [{"label": r["label"], "score": r["score"]} for r in pipe(req.text, req.labels, threshold=0.0)[0]]
+    # return_hierarchical -> {label: score} for every label (softmax if single-label, sigmoid if multi-label)
+    scores = pipe(req.text, req.labels, threshold=0.0, return_hierarchical=True)[0]
+    return [{"label": l, "score": s} for l, s in scores.items()]
 
 
 def _jevk5(model, req: ClassifyRequest):
