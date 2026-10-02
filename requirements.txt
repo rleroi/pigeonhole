@@ -1,0 +1,6 @@
+fastapi==0.142.2
+gliclass==0.1.20
+torch==2.14.1
+transformers==5.18.0
+uvicorn==0.54.0
+jevk5[lite] @ git+https://github.com/allebee/jevk5@v0.3.1
