@@ -57,7 +57,7 @@ class ClassifyRequest(BaseModel):
     model: str = DEFAULT_MODEL
     multi_label: bool = False
     threshold: float = Field(0.5, ge=0, le=1)
-    top_k: int | None = Field(None, ge=1, description="only return the k best labels (default: all)")
+    top_k: int | None = Field(None, ge=1, description="multi_label only: cap the number of returned labels")
 
 
 def _hf_zeroshot(pipe, req: ClassifyRequest):
@@ -115,9 +115,11 @@ def classify(req: ClassifyRequest):
     except ImportError as e:
         raise HTTPException(501, f"backend '{backend}' not installed: {e}")
 
-    results = run_backend(req.model, model, req)
+    ranked = run_backend(req.model, model, req)  # every label, best first
     if req.multi_label:
-        results = [r for r in results if r["score"] >= req.threshold]
+        results = [r for r in ranked if r["score"] >= req.threshold]
+    else:
+        results = ranked[:1]
     if req.top_k:
         results = results[: req.top_k]
     best = results[0] if results else None
@@ -127,4 +129,5 @@ def classify(req: ClassifyRequest):
         "label": best["label"] if best else None,
         "score": best["score"] if best else None,
         "results": results,
+        "scores": {r["label"]: r["score"] for r in ranked},
     }

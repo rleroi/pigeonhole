@@ -16,7 +16,8 @@ curl -X POST localhost:8000/classify -H 'Content-Type: application/json' -d '{
 
 ```json
 {"model": "deberta-zeroshot", "task": "intent", "label": "annuleren", "score": 0.99,
- "results": [{"label": "annuleren", "score": 0.99}, {"label": "vraag", "score": 0.01}, ...]}
+ "results": [{"label": "annuleren", "score": 0.99}],
+ "scores": {"annuleren": 0.99, "vraag": 0.01, "terugbetaling": 0.0, "klacht": 0.0, "compliment": 0.0}}
 ```
 
 - **Zero-shot:** change the labels per request, nothing to retrain.
@@ -58,11 +59,17 @@ Lists available models, the default, and which are already loaded.
 | `model`       | string    | `deberta-zeroshot` | see [Models](#models) |
 | `multi_label` | bool      | `false`            | allow several labels at once |
 | `threshold`   | float 0-1 | `0.5`              | minimum score when `multi_label` is on |
-| `top_k`       | int       | all                | only return the k best labels in `results` |
+| `top_k`       | int       | all                | with `multi_label`: cap the number of labels in `results` |
 
-The response has the winner as top-level `label` and `score` (`null` if nothing passes the threshold), plus `results`
-with every label and its score, sorted by `score`, highest first. Without `multi_label` the scores sum to 1; use
-`label`, or `top_k: 1`, if you only want the winner. Unknown model names return `400`; a model whose package is not
+Response fields:
+
+| field     | meaning |
+|-----------|---------|
+| `results` | the prediction. Without `multi_label`: exactly one label. With `multi_label`: every label with a score >= `threshold` (can be empty), best first |
+| `label`, `score` | the best entry of `results`, or `null` if `results` is empty |
+| `scores`  | the full distribution: every label with its score. Without `multi_label` they sum to 1; with `multi_label` each label is scored independently |
+
+Unknown model names return `400`; a model whose package is not
 installed returns `501`.
 
 ### Examples
@@ -151,8 +158,8 @@ Results and methodology: [BENCHMARK.md](BENCHMARK.md).
 
 ## Good to know
 
-- Every model returns every label, in the same shape. Without `multi_label` the scores are a softmax and sum to 1;
-  with `multi_label` each label gets an independent score between 0 and 1 and `threshold` filters `results`.
+- Every model fills `scores` with all labels in the same shape. `results` is the actual prediction (see
+  [API](#post-classify)).
 - Scores are still not comparable between models: each one is calibrated differently.
 - Before routing on a threshold, check that the scores are calibrated on your own data (does 0.8 mean right about
   80% of the time?).
